@@ -23,8 +23,7 @@
     "js-cookie": "^2.2.0",
     "next-tick": "^1.0.0",
     "punycode": "^2.1.0",
-    "qs": "^6.5.2",
-    "url-parse": "^1.2.0"
+    "qs": "^6.5.2"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
