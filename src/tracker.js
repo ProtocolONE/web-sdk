@@ -1,5 +1,7 @@
 import fnv64_1a_fast from './functions/fnv64a'
 import {isString} from './functions/strings'
+import EventEmitter from './emitter'
+
 
 import {
     getNotificationPermission
@@ -22,20 +24,33 @@ import {
     doc
 } from './aliases'
 
-export default class Tracker {
+export default class Tracker extends EventEmitter {
     constructor() {
-        this.id = 'undone'
+        super();
+        this.id = '';
     }
 
     initialize() {
+        console.log('dom ready initialize');
     }
 
-    trackingId() {
+    counterId() {
         return this.id
     }
 
-    page() {
-        this.handle("page");
+    init(id) {
+        this.id = id;
+        console.log(this.id);
+    }
+
+    page(data) {
+        console.log(data);
+        this.handle("page", data);
+    }
+
+    event(data) {
+        console.log(data);
+        this.handle("event", data);
     }
 
     handle(name, data = {}, options = {}) {
@@ -43,6 +58,7 @@ export default class Tracker {
             'fpr': getFingerPrint(),
             'page': {
                 'url': win.location.href,
+                'ref': doc.referrer,
                 'la': getLanguage(),
                 'cs': getDocumentCharset(),
             },
@@ -65,16 +81,25 @@ export default class Tracker {
             'plt': nav.platform || null,
             'c': navigator.cookieEnabled ? "1" : "",
             'nt': getNetType(),
-
         };
 
-        console.log(techInfo);
+        console.log(techInfo, data);
     }
 }
-
+/**
+ * @undone event listener
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
+ * @returns {*}
+ */
 function getNetType() {
-    let type = (nav.connection || {type: ""}).type;
-    return {
+    let netInfo = nav.connection;
+    if (!netInfo) {
+        return {};
+    }
+
+    let type = netInfo.type;
+    type = {
         other: "0",
         none: "1",
         unknown: "2",
@@ -85,6 +110,22 @@ function getNetType() {
         wimax: "7",
         mixed: "8"
     }[type] || type;
+
+    let effectiveType = netInfo.effectiveType;
+    effectiveType = {
+        "slow-2g": "1",
+        "2g": "2",
+        "3g": "3",
+        "4g": "4",
+    }[effectiveType] || effectiveType;
+
+    return {
+        dl: netInfo.downlink,
+        dm: netInfo.downlinkMax,
+        t: type,
+        et: effectiveType,
+        rtt: netInfo.rtt
+    }
 }
 
 function getFingerPrint() {
