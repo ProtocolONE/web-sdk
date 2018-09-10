@@ -2,7 +2,6 @@ import fnv64_1a_fast from './functions/fnv64a'
 import {isString} from './functions/strings'
 import EventEmitter from './emitter'
 
-
 import {
     getNotificationPermission
 } from './helpers/browser'
@@ -18,6 +17,8 @@ import {
     getFirstContentfulPaint
 } from './helpers/metrics'
 
+import Transport from './transport'
+
 import {
     win,
     nav,
@@ -28,6 +29,10 @@ export default class Tracker extends EventEmitter {
     constructor() {
         super();
         this.id = '';
+        //UNDONE Fix hardcode server path
+        this.transport = Transport.getOrCreate(this, {
+            server: 'localhost',
+        });
     }
 
     initialize() {
@@ -84,6 +89,7 @@ export default class Tracker extends EventEmitter {
         };
 
         console.log(techInfo, data);
+        this.transport.send(techInfo);
     }
 }
 /**
