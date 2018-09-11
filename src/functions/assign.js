@@ -6,7 +6,7 @@
  *     assigned to target. Non-objects are converted to objects.
  * @return {!Object} The modified target object.
  */
-export const assign = Object.assign || function(target, ...sources) {
+export const assign = function(target, ...sources) {
     for (let i = 0, len = sources.length; i < len; i++) {
         const source = Object(sources[i]);
         for (let key in source) {

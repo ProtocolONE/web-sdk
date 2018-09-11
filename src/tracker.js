@@ -18,6 +18,7 @@ import {
 } from './helpers/metrics'
 
 import Transport from './transport'
+import SessionTracker from './trackers/session_tracker'
 
 import {
     win,
@@ -28,11 +29,18 @@ import {
 export default class Tracker extends EventEmitter {
     constructor() {
         super();
-        this.id = '';
+        this.id = 'UNDONE';
+
         //UNDONE Fix hardcode server path
         this.transport = Transport.getOrCreate(this, {
             server: 'localhost',
         });
+
+
+        //UNDONE Unproper initialization of tracker id
+        this.trackers = [
+            SessionTracker.getOrCreate(this),
+        ];
     }
 
     initialize() {
@@ -45,16 +53,13 @@ export default class Tracker extends EventEmitter {
 
     init(id) {
         this.id = id;
-        console.log(this.id);
     }
 
     page(data) {
-        console.log(data);
         this.handle("page", data);
     }
 
     event(data) {
-        console.log(data);
         this.handle("event", data);
     }
 
@@ -86,7 +91,11 @@ export default class Tracker extends EventEmitter {
             'plt': nav.platform || null,
             'c': navigator.cookieEnabled ? "1" : "",
             'nt': getNetType(),
+            'tr': [],
         };
+
+        this.trackers.forEach(t => t.handle(name, data, options));
+        this.trackers.forEach(t => techInfo.tr.push(t.getData()));
 
         console.log(techInfo, data);
         this.transport.send(techInfo);
